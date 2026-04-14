@@ -1,0 +1,14 @@
+{
+  "appId": "3458764667699197442",
+  "appName": "Task Finder",
+  "sdkVersion": "SDK_V2",
+  "sdkUri": "https://myprojects-seven-beta.vercel.app/index.html",
+  "redirectUris": [],
+  "scopes": [
+    "boards:read",
+    "boards:write"
+  ],
+  "icons": {
+    "colored": "https://myprojects-seven-beta.vercel.app/icon.svg"
+  }
+}
