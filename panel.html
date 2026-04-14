@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Task Finder</title>
+  <script src="https://miro.com/app/static/sdk/v2/miro.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap');
+
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --border: #e8e6e0;
+      --border2: #d0cdc4;
+      --text: #1a1916;
+      --muted: #9b9890;
+      --muted2: #c4c1b8;
+      --red: #e8503a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 12px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .header-actions { display: flex; gap: 6px; align-items: center; }
+
+    .icon-btn {
+      background: none;
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 3px 7px;
+      transition: all 0.12s;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .icon-btn:hover { background: var(--bg); color: var(--text); border-color: var(--text); }
+
+    /* ── Minimized state ── */
+    .minimized-bar {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .minimized-bar::-webkit-scrollbar { width: 2px; }
+    .minimized-bar::-webkit-scrollbar-thumb { background: var(--border2); }
+
+    .mini-btn {
+      width: 100%;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      border: none;
+      border-radius: 5px;
+      padding: 7px 8px;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: opacity 0.12s, transform 0.1s;
+      color: #1a1916;
+    }
+    .mini-btn:hover { opacity: 0.85; transform: translateX(2px); }
+    .mini-btn:active { transform: scale(0.97); }
+    .mini-btn.loading { opacity: 0.6; cursor: wait; }
+
+    .mini-count {
+      font-size: 9px;
+      opacity: 0.7;
+      background: rgba(0,0,0,0.12);
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
+
+    /* ── Expanded state ── */
+    .expanded-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+    .scroll::-webkit-scrollbar { width: 3px; }
+    .scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .section-lbl {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    /* Add term */
+    .add-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .term-input {
+      flex: 1;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      color: var(--text);
+      padding: 6px 8px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .term-input:focus { border-color: var(--text); }
+    .term-input::placeholder { color: var(--muted2); }
+
+    .add-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      border-radius: 5px;
+      padding: 6px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.12s;
+    }
+    .add-btn:hover { opacity: 0.8; }
+
+    /* Term cards */
+    .terms-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .term-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color 0.12s, transform 0.1s;
+    }
+    .term-card:hover { border-color: var(--border2); transform: translateX(2px); }
+    .term-card:active { transform: scale(0.98); }
+    .term-card.searching { opacity: 0.6; cursor: wait; }
+
+    .term-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .term-name {
+      flex: 1;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .term-count {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      background: var(--bg);
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
+
+    .term-remove {
+      background: none; border: none;
+      color: var(--muted2); cursor: pointer;
+      font-size: 13px; padding: 0;
+      transition: color 0.12s; flex-shrink: 0;
+    }
+    .term-remove:hover { color: var(--red); }
+
+    /* Color picker row */
+    .color-row {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .color-opt {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.12s, transform 0.1s;
+    }
+    .color-opt:hover { transform: scale(1.2); }
+    .color-opt.selected { border-color: var(--text); }
+
+    /* Status bar */
+    .status-bar {
+      border-top: 1px solid var(--border);
+      padding: 6px 12px;
+      background: var(--surface);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-shrink: 0;
+      min-height: 28px;
+      align-items: center;
+    }
+
+    .status-msg { color: var(--text); font-weight: 500; }
+
+    .empty-terms {
+      text-align: center;
+      padding: 20px 10px;
+      color: var(--muted2);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <span class="title" id="header-title">Task Finder</span>
+  <div class="header-actions">
+    <button class="icon-btn" id="minimize-btn" onclick="toggleMinimize()" title="Minimizar">—</button>
+  </div>
+</div>
+
+<!-- Minimized view -->
+<div class="minimized-bar" id="minimized-bar"></div>
+
+<!-- Expanded view -->
+<div class="expanded-body" id="expanded-body">
+  <div class="scroll">
+
+    <div class="section-lbl">Adicionar termo</div>
+    <div class="add-row">
+      <input class="term-input" id="term-input" placeholder="ex: GWPP, bug, feat..." maxlength="40"/>
+      <button class="add-btn" onclick="addTerm()">+ Add</button>
+    </div>
+
+    <div class="section-lbl">Cor</div>
+    <div class="color-row" id="color-row"></div>
+
+    <div class="section-lbl">Termos salvos — clique para buscar</div>
+    <div class="terms-grid" id="terms-grid"></div>
+
+  </div>
+
+  <div class="status-bar">
+    <span id="status-left">—</span>
+    <span id="status-right" class="status-msg"></span>
+  </div>
+</div>
+
+<script>
+const COLORS = [
+  '#C8F135','#5B8CFF','#FF6B6B','#06D6A0',
+  '#FFD166','#FF9F43','#A29BFE','#FD79A8','#74B9FF','#00CEC9'
+];
+const TEXT_TYPES = ['sticky_note','text','shape','card','app_card','frame'];
+
+let terms = loadTerms();
+let selectedColor = COLORS[0];
+let minimized = false;
+
+function loadTerms() {
+  try {
+    const r = localStorage.getItem('miro_finder_terms');
+    if (r) return JSON.parse(r);
+  } catch(_) {}
+  return [];
+}
+
+function saveTerms() { localStorage.setItem('miro_finder_terms', JSON.stringify(terms)); }
+
+// ── Color picker ──────────────────────────────────────────────────────────────
+function renderColorRow() {
+  const row = document.getElementById('color-row');
+  row.innerHTML = '';
+  COLORS.forEach(c => {
+    const el = document.createElement('div');
+    el.className = `color-opt${c === selectedColor ? ' selected' : ''}`;
+    el.style.background = c;
+    el.onclick = () => { selectedColor = c; renderColorRow(); };
+    row.appendChild(el);
+  });
+}
+
+// ── Terms grid ────────────────────────────────────────────────────────────────
+function renderTerms() {
+  const grid = document.getElementById('terms-grid');
+  grid.innerHTML = '';
+
+  if (terms.length === 0) {
+    grid.innerHTML = '<div class="empty-terms">Nenhum termo ainda.<br>Adicione acima ↑</div>';
+    document.getElementById('status-left').textContent = '0 termos';
+    return;
+  }
+
+  terms.forEach((term, i) => {
+    const card = document.createElement('div');
+    card.className = 'term-card';
+    card.id = `term-card-${i}`;
+    card.onclick = (e) => { if (e.target.classList.contains('term-remove')) return; searchTerm(i); };
+    card.innerHTML = `
+      <div class="term-dot" style="background:${term.color}"></div>
+      <span class="term-name">${term.keyword}</span>
+      <span class="term-count" id="count-${i}">${term.count !== undefined ? term.count : '?'}</span>
+      <button class="term-remove" onclick="removeTerm(${i})">×</button>
+    `;
+    grid.appendChild(card);
+  });
+
+  document.getElementById('status-left').textContent = `${terms.length} termo${terms.length !== 1 ? 's' : ''}`;
+  renderMinimized();
+}
+
+function renderMinimized() {
+  const bar = document.getElementById('minimized-bar');
+  bar.innerHTML = '';
+  terms.forEach((term, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mini-btn';
+    btn.id = `mini-btn-${i}`;
+    btn.style.background = term.color + '33';
+    btn.style.borderLeft = `3px solid ${term.color}`;
+    btn.innerHTML = `
+      <span>${term.keyword}</span>
+      <span class="mini-count">${term.count !== undefined ? term.count : '?'}</span>
+    `;
+    btn.onclick = () => searchTerm(i);
+    bar.appendChild(btn);
+  });
+}
+
+// ── Search ────────────────────────────────────────────────────────────────────
+async function searchTerm(i) {
+  const term = terms[i];
+  const card = document.getElementById(`term-card-${i}`);
+  const miniBtn = document.getElementById(`mini-btn-${i}`);
+
+  if (card) card.classList.add('searching');
+  if (miniBtn) miniBtn.classList.add('loading');
+  setStatus('', `Buscando "${term.keyword}"...`);
+
+  try {
+    const items = await miro.board.get();
+    const matched = items.filter(item => {
+      if (!TEXT_TYPES.includes(item.type)) return false;
+      const t = (item.content || item.title || item.text || '')
+        .replace(/<[^>]*>/g, '').toLowerCase();
+      return t.includes(term.keyword.toLowerCase());
+    });
+
+    // Update count
+    terms[i].count = matched.length;
+    saveTerms();
+
+    const countEl = document.getElementById(`count-${i}`);
+    if (countEl) countEl.textContent = matched.length;
+    if (miniBtn) miniBtn.querySelector('.mini-count').textContent = matched.length;
+
+    if (matched.length === 0) {
+      setStatus('', `"${term.keyword}" — nenhum resultado`);
+    } else {
+      await miro.board.select({ id: matched.map(m => m.id) });
+      await miro.board.viewport.zoomTo(matched);
+      setStatus('', `✓ ${matched.length} item${matched.length !== 1 ? 's' : ''} encontrado${matched.length !== 1 ? 's' : ''}`);
+    }
+  } catch(e) {
+    setStatus('', 'Erro ao buscar');
+    console.error(e);
+  }
+
+  if (card) card.classList.remove('searching');
+  if (miniBtn) miniBtn.classList.remove('loading');
+}
+
+// ── Add/Remove ────────────────────────────────────────────────────────────────
+function addTerm() {
+  const input = document.getElementById('term-input');
+  const val = input.value.trim();
+  if (!val || terms.find(t => t.keyword.toLowerCase() === val.toLowerCase())) {
+    input.value = ''; return;
+  }
+  terms.push({ keyword: val, color: selectedColor, count: undefined });
+  selectedColor = COLORS[terms.length % COLORS.length];
+  saveTerms();
+  input.value = '';
+  renderColorRow();
+  renderTerms();
+}
+
+function removeTerm(i) {
+  terms.splice(i, 1);
+  saveTerms();
+  renderTerms();
+}
+
+// ── Minimize ──────────────────────────────────────────────────────────────────
+function toggleMinimize() {
+  minimized = !minimized;
+  const expanded = document.getElementById('expanded-body');
+  const miniBar = document.getElementById('minimized-bar');
+  const btn = document.getElementById('minimize-btn');
+  const title = document.getElementById('header-title');
+
+  if (minimized) {
+    expanded.style.display = 'none';
+    miniBar.style.display = 'flex';
+    btn.textContent = '▲';
+    btn.title = 'Expandir';
+    title.textContent = `Finder (${terms.length})`;
+  } else {
+    expanded.style.display = 'flex';
+    miniBar.style.display = 'none';
+    btn.textContent = '—';
+    btn.title = 'Minimizar';
+    title.textContent = 'Task Finder';
+  }
+}
+
+function setStatus(left, right) {
+  if (left !== '') document.getElementById('status-left').textContent = left;
+  if (right !== '') document.getElementById('status-right').textContent = right;
+  if (right) setTimeout(() => { document.getElementById('status-right').textContent = ''; }, 3000);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.getElementById('term-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTerm();
+});
+
+miro.onReady(() => {
+  renderColorRow();
+  renderTerms();
+});
+</script>
+</body>
+</html>
