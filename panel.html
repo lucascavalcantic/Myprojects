@@ -17,6 +17,7 @@
       --muted: #9b9890;
       --muted2: #c4c1b8;
       --red: #e8503a;
+      --green: #1a7a45;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,7 +33,6 @@
       overflow: hidden;
     }
 
-    /* ── Header ── */
     .header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -49,10 +49,7 @@
       font-weight: 500;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--text);
     }
-
-    .header-actions { display: flex; gap: 6px; align-items: center; }
 
     .icon-btn {
       background: none;
@@ -67,7 +64,62 @@
     }
     .icon-btn:hover { background: var(--bg); color: var(--text); border-color: var(--text); }
 
-    /* ── Minimized state ── */
+    /* ── Search bar ── */
+    .search-section {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+      flex-shrink: 0;
+    }
+
+    .search-wrap { position: relative; }
+
+    .search-input {
+      width: 100%;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 8px 32px 8px 32px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--text); }
+    .search-input::placeholder { color: var(--muted2); }
+
+    .search-icon {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted2);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 9px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--muted); cursor: pointer;
+      font-size: 15px; padding: 0;
+      display: none;
+      transition: color 0.12s;
+    }
+    .clear-btn:hover { color: var(--text); }
+    .search-input:not(:placeholder-shown) ~ .clear-btn { display: block; }
+
+    .search-hint {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      color: var(--muted2);
+      margin-top: 5px;
+      text-align: right;
+    }
+
+    /* ── Minimized ── */
     .minimized-bar {
       display: none;
       flex-direction: column;
@@ -96,18 +148,9 @@
       color: #1a1916;
     }
     .mini-btn:hover { opacity: 0.85; transform: translateX(2px); }
-    .mini-btn:active { transform: scale(0.97); }
-    .mini-btn.loading { opacity: 0.6; cursor: wait; }
+    .mini-count { font-size: 9px; opacity: 0.7; background: rgba(0,0,0,0.12); border-radius: 3px; padding: 1px 5px; }
 
-    .mini-count {
-      font-size: 9px;
-      opacity: 0.7;
-      background: rgba(0,0,0,0.12);
-      border-radius: 3px;
-      padding: 1px 5px;
-    }
-
-    /* ── Expanded state ── */
+    /* ── Expanded ── */
     .expanded-body {
       flex: 1;
       display: flex;
@@ -133,11 +176,7 @@
     }
 
     /* Add term */
-    .add-row {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 14px;
-    }
+    .add-row { display: flex; gap: 6px; margin-bottom: 10px; }
 
     .term-input {
       flex: 1;
@@ -164,18 +203,23 @@
       border-radius: 5px;
       padding: 6px 10px;
       cursor: pointer;
-      white-space: nowrap;
       transition: opacity 0.12s;
     }
     .add-btn:hover { opacity: 0.8; }
 
-    /* Term cards */
-    .terms-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 16px;
+    .color-row { display: flex; gap: 5px; margin-bottom: 14px; flex-wrap: wrap; }
+
+    .color-opt {
+      width: 18px; height: 18px;
+      border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.12s, transform 0.1s;
     }
+    .color-opt:hover { transform: scale(1.2); }
+    .color-opt.selected { border-color: var(--text); }
+
+    /* Term cards */
+    .terms-grid { display: flex; flex-direction: column; gap: 6px; }
 
     .term-card {
       background: var(--surface);
@@ -190,57 +234,57 @@
     }
     .term-card:hover { border-color: var(--border2); transform: translateX(2px); }
     .term-card:active { transform: scale(0.98); }
-    .term-card.searching { opacity: 0.6; cursor: wait; }
+    .term-card.searching { opacity: 0.5; cursor: wait; }
 
-    .term-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .term-name {
-      flex: 1;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
-      font-weight: 500;
-    }
-
+    .term-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .term-name { flex: 1; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; }
     .term-count {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px;
-      color: var(--muted);
-      background: var(--bg);
-      border-radius: 3px;
-      padding: 1px 5px;
+      font-size: 10px; color: var(--muted);
+      background: var(--bg); border-radius: 3px; padding: 1px 5px;
     }
-
     .term-remove {
-      background: none; border: none;
-      color: var(--muted2); cursor: pointer;
-      font-size: 13px; padding: 0;
+      background: none; border: none; color: var(--muted2);
+      cursor: pointer; font-size: 13px; padding: 0;
       transition: color 0.12s; flex-shrink: 0;
     }
     .term-remove:hover { color: var(--red); }
 
-    /* Color picker row */
-    .color-row {
+    /* Results */
+    .results-area { margin-top: 14px; }
+
+    .result-item {
       display: flex;
-      gap: 5px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-
-    .color-opt {
-      width: 18px; height: 18px;
-      border-radius: 50%;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 7px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 5px;
       cursor: pointer;
-      border: 2px solid transparent;
-      transition: border-color 0.12s, transform 0.1s;
+      transition: border-color 0.12s;
+      animation: fadeUp 0.12s ease;
     }
-    .color-opt:hover { transform: scale(1.2); }
-    .color-opt.selected { border-color: var(--text); }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .result-item:hover { border-color: var(--border2); background: var(--bg); }
 
-    /* Status bar */
+    .result-text { flex: 1; font-size: 11px; line-height: 1.4; word-break: break-word; }
+    .result-zoom { color: var(--muted2); font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+    .highlight { background: #ffeb3b66; border-radius: 2px; padding: 0 1px; }
+
+    .empty-terms {
+      text-align: center;
+      padding: 16px 10px;
+      color: var(--muted2);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+    }
+
+    /* Status */
     .status-bar {
       border-top: 1px solid var(--border);
       padding: 6px 12px;
@@ -250,50 +294,61 @@
       color: var(--muted);
       display: flex;
       justify-content: space-between;
+      align-items: center;
       flex-shrink: 0;
       min-height: 28px;
-      align-items: center;
     }
 
-    .status-msg { color: var(--text); font-weight: 500; }
+    .status-msg { color: var(--green); font-weight: 500; }
 
-    .empty-terms {
-      text-align: center;
-      padding: 20px 10px;
-      color: var(--muted2);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px;
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--text);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 4px;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-<!-- Header -->
 <div class="header">
   <span class="title" id="header-title">Task Finder</span>
-  <div class="header-actions">
-    <button class="icon-btn" id="minimize-btn" onclick="toggleMinimize()" title="Minimizar">—</button>
-  </div>
+  <button class="icon-btn" id="minimize-btn" onclick="toggleMinimize()">—</button>
 </div>
 
-<!-- Minimized view -->
+<!-- Search bar -->
+<div class="search-section" id="search-section">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" id="search-input" type="text"
+      placeholder="Buscar no board..."
+      autocomplete="off"/>
+    <button class="clear-btn" id="clear-btn" onclick="clearSearch()">×</button>
+  </div>
+  <div class="search-hint" id="search-hint">Digite para buscar</div>
+</div>
+
+<!-- Minimized -->
 <div class="minimized-bar" id="minimized-bar"></div>
 
-<!-- Expanded view -->
+<!-- Expanded -->
 <div class="expanded-body" id="expanded-body">
-  <div class="scroll">
+  <div class="scroll" id="scroll">
 
-    <div class="section-lbl">Adicionar termo</div>
+    <div class="section-lbl">Termos salvos</div>
     <div class="add-row">
-      <input class="term-input" id="term-input" placeholder="ex: GWPP, bug, feat..." maxlength="40"/>
+      <input class="term-input" id="term-input" placeholder="ex: GWPP, bug..." maxlength="40"/>
       <button class="add-btn" onclick="addTerm()">+ Add</button>
     </div>
-
-    <div class="section-lbl">Cor</div>
     <div class="color-row" id="color-row"></div>
-
-    <div class="section-lbl">Termos salvos — clique para buscar</div>
     <div class="terms-grid" id="terms-grid"></div>
+    <div class="results-area" id="results-area"></div>
 
   </div>
 
@@ -304,27 +359,107 @@
 </div>
 
 <script>
-const COLORS = [
-  '#C8F135','#5B8CFF','#FF6B6B','#06D6A0',
-  '#FFD166','#FF9F43','#A29BFE','#FD79A8','#74B9FF','#00CEC9'
-];
-const TEXT_TYPES = ['sticky_note','text','shape','card','app_card','frame'];
+const COLORS = ['#C8F135','#5B8CFF','#FF6B6B','#06D6A0','#FFD166','#FF9F43','#A29BFE','#FD79A8','#74B9FF','#00CEC9'];
+// Busca APENAS text e shape (ícones)
+const SEARCH_TYPES = ['text', 'shape'];
 
 let terms = loadTerms();
 let selectedColor = COLORS[0];
 let minimized = false;
+let searchDebounce = null;
+let lastQuery = '';
 
 function loadTerms() {
-  try {
-    const r = localStorage.getItem('miro_finder_terms');
-    if (r) return JSON.parse(r);
-  } catch(_) {}
+  try { const r = localStorage.getItem('miro_finder_v3'); if (r) return JSON.parse(r); } catch(_) {}
   return [];
 }
+function saveTerms() { localStorage.setItem('miro_finder_v3', JSON.stringify(terms)); }
 
-function saveTerms() { localStorage.setItem('miro_finder_terms', JSON.stringify(terms)); }
+function extractText(item) {
+  return (item.content || item.title || item.text || '').replace(/<[^>]*>/g, '').trim();
+}
 
-// ── Color picker ──────────────────────────────────────────────────────────────
+// ── Search bar ────────────────────────────────────────────────────────────────
+function initSearchInput() {
+  const input = document.getElementById('search-input');
+  input.addEventListener('input', function() {
+    const val = this.value.trim();
+    clearTimeout(searchDebounce);
+    if (!val) {
+      clearSearch();
+      return;
+    }
+    document.getElementById('search-hint').innerHTML = '<span class="spinner"></span> aguardando...';
+    searchDebounce = setTimeout(() => runSearch(val), 600);
+  });
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      clearTimeout(searchDebounce);
+      const val = this.value.trim();
+      if (val) runSearch(val);
+    }
+    if (e.key === 'Escape') clearSearch();
+  });
+}
+
+async function runSearch(query) {
+  lastQuery = query;
+  document.getElementById('search-hint').innerHTML = '<span class="spinner"></span> buscando...';
+  document.getElementById('results-area').innerHTML = '';
+
+  try {
+    const items = await miro.board.get({ type: SEARCH_TYPES });
+    const q = query.toLowerCase();
+    const matched = items.filter(i => extractText(i).toLowerCase().includes(q));
+
+    if (matched.length === 0) {
+      document.getElementById('search-hint').textContent = `Nenhum resultado para "${query}"`;
+      document.getElementById('results-area').innerHTML = '';
+      return;
+    }
+
+    document.getElementById('search-hint').textContent = `${matched.length} resultado${matched.length !== 1 ? 's' : ''}`;
+
+    // Zoom nos itens encontrados
+    await miro.board.select({ id: matched.map(m => m.id) });
+    await miro.board.viewport.zoomTo(matched);
+
+    // Mostra lista
+    renderResults(matched, query);
+
+  } catch(e) {
+    document.getElementById('search-hint').textContent = 'Erro ao buscar';
+    console.error(e);
+  }
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-hint').textContent = 'Digite para buscar';
+  document.getElementById('results-area').innerHTML = '';
+  lastQuery = '';
+}
+
+function renderResults(items, query) {
+  const area = document.getElementById('results-area');
+  area.innerHTML = `<div class="section-lbl" style="margin-top:4px">${items.length} encontrado${items.length!==1?'s':''}</div>`;
+  const q = query.toLowerCase();
+  items.slice(0, 30).forEach(item => {
+    const text = extractText(item);
+    const highlighted = text.replace(new RegExp(`(${escReg(q)})`, 'gi'), '<span class="highlight">$1</span>');
+    const el = document.createElement('div');
+    el.className = 'result-item';
+    el.onclick = () => zoomTo(item.id);
+    el.innerHTML = `<span class="result-text">${highlighted}</span><span class="result-zoom">⊕</span>`;
+    area.appendChild(el);
+  });
+  if (items.length > 30) {
+    area.innerHTML += `<div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);text-align:center;padding:6px">+${items.length-30} mais resultados</div>`;
+  }
+}
+
+// ── Saved terms ───────────────────────────────────────────────────────────────
 function renderColorRow() {
   const row = document.getElementById('color-row');
   row.innerHTML = '';
@@ -337,103 +472,70 @@ function renderColorRow() {
   });
 }
 
-// ── Terms grid ────────────────────────────────────────────────────────────────
 function renderTerms() {
   const grid = document.getElementById('terms-grid');
   grid.innerHTML = '';
-
   if (terms.length === 0) {
-    grid.innerHTML = '<div class="empty-terms">Nenhum termo ainda.<br>Adicione acima ↑</div>';
-    document.getElementById('status-left').textContent = '0 termos';
-    return;
+    grid.innerHTML = '<div class="empty-terms">Salve termos frequentes<br>para busca rápida ↑</div>';
+  } else {
+    terms.forEach((term, i) => {
+      const card = document.createElement('div');
+      card.className = 'term-card';
+      card.id = `term-${i}`;
+      card.onclick = (e) => { if (e.target.classList.contains('term-remove')) return; quickSearch(i); };
+      card.innerHTML = `
+        <div class="term-dot" style="background:${term.color}"></div>
+        <span class="term-name">${term.keyword}</span>
+        <span class="term-count" id="tc-${i}">${term.count !== undefined ? term.count : '?'}</span>
+        <button class="term-remove" onclick="removeTerm(${i})">×</button>
+      `;
+      grid.appendChild(card);
+    });
   }
-
-  terms.forEach((term, i) => {
-    const card = document.createElement('div');
-    card.className = 'term-card';
-    card.id = `term-card-${i}`;
-    card.onclick = (e) => { if (e.target.classList.contains('term-remove')) return; searchTerm(i); };
-    card.innerHTML = `
-      <div class="term-dot" style="background:${term.color}"></div>
-      <span class="term-name">${term.keyword}</span>
-      <span class="term-count" id="count-${i}">${term.count !== undefined ? term.count : '?'}</span>
-      <button class="term-remove" onclick="removeTerm(${i})">×</button>
-    `;
-    grid.appendChild(card);
-  });
-
-  document.getElementById('status-left').textContent = `${terms.length} termo${terms.length !== 1 ? 's' : ''}`;
+  document.getElementById('status-left').textContent = `${terms.length} termo${terms.length!==1?'s':''}`;
   renderMinimized();
 }
 
-function renderMinimized() {
-  const bar = document.getElementById('minimized-bar');
-  bar.innerHTML = '';
-  terms.forEach((term, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'mini-btn';
-    btn.id = `mini-btn-${i}`;
-    btn.style.background = term.color + '33';
-    btn.style.borderLeft = `3px solid ${term.color}`;
-    btn.innerHTML = `
-      <span>${term.keyword}</span>
-      <span class="mini-count">${term.count !== undefined ? term.count : '?'}</span>
-    `;
-    btn.onclick = () => searchTerm(i);
-    bar.appendChild(btn);
-  });
-}
-
-// ── Search ────────────────────────────────────────────────────────────────────
-async function searchTerm(i) {
+async function quickSearch(i) {
   const term = terms[i];
-  const card = document.getElementById(`term-card-${i}`);
-  const miniBtn = document.getElementById(`mini-btn-${i}`);
-
+  const card = document.getElementById(`term-${i}`);
   if (card) card.classList.add('searching');
-  if (miniBtn) miniBtn.classList.add('loading');
-  setStatus('', `Buscando "${term.keyword}"...`);
+
+  // Preenche a barra de busca
+  document.getElementById('search-input').value = term.keyword;
+  document.getElementById('search-hint').innerHTML = '<span class="spinner"></span> buscando...';
 
   try {
-    const items = await miro.board.get();
-    const matched = items.filter(item => {
-      if (!TEXT_TYPES.includes(item.type)) return false;
-      const t = (item.content || item.title || item.text || '')
-        .replace(/<[^>]*>/g, '').toLowerCase();
-      return t.includes(term.keyword.toLowerCase());
-    });
+    const items = await miro.board.get({ type: SEARCH_TYPES });
+    const q = term.keyword.toLowerCase();
+    const matched = items.filter(i => extractText(i).toLowerCase().includes(q));
 
-    // Update count
     terms[i].count = matched.length;
     saveTerms();
-
-    const countEl = document.getElementById(`count-${i}`);
+    const countEl = document.getElementById(`tc-${i}`);
     if (countEl) countEl.textContent = matched.length;
-    if (miniBtn) miniBtn.querySelector('.mini-count').textContent = matched.length;
 
-    if (matched.length === 0) {
-      setStatus('', `"${term.keyword}" — nenhum resultado`);
-    } else {
+    document.getElementById('search-hint').textContent = `${matched.length} resultado${matched.length!==1?'s':''}`;
+
+    if (matched.length > 0) {
       await miro.board.select({ id: matched.map(m => m.id) });
       await miro.board.viewport.zoomTo(matched);
-      setStatus('', `✓ ${matched.length} item${matched.length !== 1 ? 's' : ''} encontrado${matched.length !== 1 ? 's' : ''}`);
+      renderResults(matched, term.keyword);
+    } else {
+      document.getElementById('results-area').innerHTML = '';
     }
-  } catch(e) {
-    setStatus('', 'Erro ao buscar');
-    console.error(e);
-  }
+
+    setStatus(`✓ ${matched.length} encontrado${matched.length!==1?'s':''}`);
+  } catch(e) { console.error(e); }
 
   if (card) card.classList.remove('searching');
-  if (miniBtn) miniBtn.classList.remove('loading');
+  renderMinimized();
 }
 
-// ── Add/Remove ────────────────────────────────────────────────────────────────
 function addTerm() {
   const input = document.getElementById('term-input');
   const val = input.value.trim();
-  if (!val || terms.find(t => t.keyword.toLowerCase() === val.toLowerCase())) {
-    input.value = ''; return;
-  }
+  if (!val || terms.find(t => t.keyword.toLowerCase() === val.toLowerCase())) { input.value = ''; return; }
   terms.push({ keyword: val, color: selectedColor, count: undefined });
   selectedColor = COLORS[terms.length % COLORS.length];
   saveTerms();
@@ -448,41 +550,61 @@ function removeTerm(i) {
   renderTerms();
 }
 
-// ── Minimize ──────────────────────────────────────────────────────────────────
+function renderMinimized() {
+  const bar = document.getElementById('minimized-bar');
+  bar.innerHTML = '';
+  terms.forEach((term, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mini-btn';
+    btn.style.background = term.color + '33';
+    btn.style.borderLeft = `3px solid ${term.color}`;
+    btn.innerHTML = `<span>${term.keyword}</span><span class="mini-count">${term.count !== undefined ? term.count : '?'}</span>`;
+    btn.onclick = () => quickSearch(i);
+    bar.appendChild(btn);
+  });
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+async function zoomTo(id) {
+  try {
+    const items = await miro.board.get({ type: SEARCH_TYPES });
+    const item = items.find(i => i.id === id);
+    if (item) { await miro.board.select({ id }); await miro.board.viewport.zoomTo([item]); }
+  } catch(e) {}
+}
+
 function toggleMinimize() {
   minimized = !minimized;
   const expanded = document.getElementById('expanded-body');
+  const searchSec = document.getElementById('search-section');
   const miniBar = document.getElementById('minimized-bar');
   const btn = document.getElementById('minimize-btn');
   const title = document.getElementById('header-title');
-
   if (minimized) {
     expanded.style.display = 'none';
+    searchSec.style.display = 'none';
     miniBar.style.display = 'flex';
     btn.textContent = '▲';
-    btn.title = 'Expandir';
     title.textContent = `Finder (${terms.length})`;
   } else {
     expanded.style.display = 'flex';
+    searchSec.style.display = 'block';
     miniBar.style.display = 'none';
     btn.textContent = '—';
-    btn.title = 'Minimizar';
     title.textContent = 'Task Finder';
   }
 }
 
-function setStatus(left, right) {
-  if (left !== '') document.getElementById('status-left').textContent = left;
-  if (right !== '') document.getElementById('status-right').textContent = right;
-  if (right) setTimeout(() => { document.getElementById('status-right').textContent = ''; }, 3000);
+function setStatus(msg) {
+  const el = document.getElementById('status-right');
+  el.textContent = msg;
+  setTimeout(() => { el.textContent = ''; }, 3000);
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-document.getElementById('term-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addTerm();
-});
+function escReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 miro.onReady(() => {
+  initSearchInput();
   renderColorRow();
   renderTerms();
 });
